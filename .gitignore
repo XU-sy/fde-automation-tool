@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+.env*.local
+.env
+
+# playwright
+/test-results/
+/playwright-report/
+
+# vercel
+.vercel
+
+# playwright 截图存证（运行产物，非源码）
+automation/last-run.png
+
+# typescript 增量缓存
+*.tsbuildinfo
