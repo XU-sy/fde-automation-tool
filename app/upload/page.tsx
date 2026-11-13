@@ -17,9 +17,11 @@ export default function UploadPage() {
   const [saving, setSaving] = useState(false);
   const [automating, setAutomating] = useState(false);
   const [status, setStatus] = useState<
-    "idle" | "saved" | "error" | "reviewed" | "automated"
+    "idle" | "saved" | "error" | "reviewed" | "automated" | "local-only"
   >("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
+  // 云端演示模式下，服务端会回一条"指引"，这里存下来展示给用户
+  const [cloudHint, setCloudHint] = useState<string>("");
 
   async function handleExtract() {
     console.log("[点击] 提取字段按钮被点击", { fileName: file?.name });
@@ -99,7 +101,12 @@ export default function UploadPage() {
         body: JSON.stringify(fields),
       });
       const data = await res.json();
-      if (data.ok) {
+
+      // 云端演示模式：服务端没有 Chromium，不硬跑，改为"下载字段 → 回本地执行"
+      if (data.mode === "cloud-demo") {
+        setStatus("local-only");
+        setCloudHint(data.hint ?? "");
+      } else if (data.ok) {
         setStatus("automated");
       } else {
         setStatus("error");
@@ -110,6 +117,20 @@ export default function UploadPage() {
       setErrorMsg(e?.message ?? String(e));
     }
     setAutomating(false);
+  }
+
+  // 把当前校对的字段导出成 payload.json（给本地录入引擎吃）
+  function handleDownloadPayload() {
+    if (!fields) return;
+    const blob = new Blob([JSON.stringify(fields, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "payload.json";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -139,6 +160,31 @@ export default function UploadPage() {
       )}
       {status === "error" && (
         <p className="text-red-600 text-sm">❌ 失败：{errorMsg}</p>
+      )}
+
+      {status === "local-only" && (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 space-y-2">
+          <p className="font-medium">
+            ⚠️ 云端演示模式：这台服务器没有 Chromium，"动手填表"要回本地跑
+          </p>
+          <p>
+            字段已经校验过了，把下面这份 JSON 交给本地录入引擎即可（本地窗口会自动打开并提交）：
+          </p>
+          <ol className="list-decimal ml-5 space-y-1">
+            <li>点下面的按钮，下载 payload.json</li>
+            <li>把它放到项目根目录（fde-automation-tool 下）</li>
+            <li>
+              在本地终端执行：
+              <code className="bg-white px-1 rounded border border-amber-200 mx-1">
+                npm run automate -- payload.json
+              </code>
+            </li>
+          </ol>
+          {cloudHint && <p className="text-xs text-amber-700">{cloudHint}</p>}
+          <Button variant="outline" onClick={handleDownloadPayload}>
+            ⬇️ 下载字段 JSON（payload.json）
+          </Button>
+        </div>
       )}
 
       {fields && (
