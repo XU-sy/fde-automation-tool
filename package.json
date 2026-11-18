@@ -10,6 +10,8 @@
     "automate": "tsx automation/run.ts",
     "mcp": "tsx automation/mcp-server.ts",
     "make-test-pdf": "node scripts/make-test-pdf.mjs",
+    "make-waybills": "node scripts/make-waybill-corpus.mjs",
+    "eval-extract": "tsx scripts/eval-extract.ts",
     "verify-extract": "tsx scripts/verify-extract.ts"
   },
   "dependencies": {

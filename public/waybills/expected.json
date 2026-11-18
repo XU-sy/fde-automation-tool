@@ -1,0 +1,106 @@
+[
+  {
+    "id": "v1-standard",
+    "file": "v1-standard.pdf",
+    "note": "基准版：和现有样本一致，用于回归",
+    "expected": {
+      "tracking_no": "SF1234567890",
+      "receiver": "张三",
+      "phone": "13800000000",
+      "address": "浙江省杭州市余杭区文一西路969号3号楼502室",
+      "date": "2026-09-18",
+      "amount": "128.50"
+    }
+  },
+  {
+    "id": "v2-label-variants",
+    "file": "v2-label-variants.pdf",
+    "note": "标签叫法不同 + 冒号前有空格 + 全角符号",
+    "expected": {
+      "tracking_no": "JD8899001122",
+      "receiver": "李四",
+      "phone": "13911112222",
+      "address": "广东省深圳市南山区科技园南路8号A栋1203",
+      "date": "2026-09-05",
+      "amount": "86.00"
+    }
+  },
+  {
+    "id": "v3-cn-date",
+    "file": "v3-cn-date.pdf",
+    "note": "日期用「年月日」中文写法",
+    "expected": {
+      "tracking_no": "YT2026091800012",
+      "receiver": "王五",
+      "phone": "13700001111",
+      "address": "江苏省南京市鼓楼区中山北路100号",
+      "date": "2026-09-18",
+      "amount": "45.60"
+    }
+  },
+  {
+    "id": "v4-amount-comma",
+    "file": "v4-amount-comma.pdf",
+    "note": "金额带千分位与货币符号",
+    "expected": {
+      "tracking_no": "ZTO5566778899",
+      "receiver": "陈七",
+      "phone": "13500003333",
+      "address": "四川省成都市武侯区天府大道北段1700号",
+      "date": "2026-09-12",
+      "amount": "1280.00"
+    }
+  },
+  {
+    "id": "v5-phone-separated",
+    "file": "v5-phone-separated.pdf",
+    "note": "电话号码带横线/空格/国家码",
+    "expected": {
+      "tracking_no": "YD3322110099",
+      "receiver": "刘八",
+      "phone": "13800001234",
+      "address": "湖北省武汉市洪山区珞喻路1037号",
+      "date": "2026-09-08",
+      "amount": "59.90"
+    }
+  },
+  {
+    "id": "v6-address-wrapped",
+    "file": "v6-address-wrapped.pdf",
+    "note": "地址跨两行（真实单据最常见）",
+    "expected": {
+      "tracking_no": "STO6677889900",
+      "receiver": "周九",
+      "phone": "13300004444",
+      "address": "浙江省宁波市鄞州区首南街道天童南路666号B座9楼",
+      "date": "2026-09-10",
+      "amount": "72.30"
+    }
+  },
+  {
+    "id": "v7-distractors",
+    "file": "v7-distractors.pdf",
+    "note": "干扰项：订单号与运单号并存、运费与合计并存、发货日与签收日并存",
+    "expected": {
+      "tracking_no": "SF7788990011",
+      "receiver": "赵六",
+      "phone": "13600002222",
+      "address": "北京市朝阳区建国路88号SOHO现代城C座",
+      "date": "2026-09-17",
+      "amount": "312.00"
+    }
+  },
+  {
+    "id": "v8-english",
+    "file": "v8-english.pdf",
+    "note": "英文单据 + 国际号码",
+    "expected": {
+      "tracking_no": "DHL1234567890",
+      "receiver": "John Smith",
+      "phone": "13800005678",
+      "address": "88 Jianguo Road, Chaoyang District, Beijing",
+      "date": "2026-09-18",
+      "amount": "1050.00"
+    }
+  }
+]

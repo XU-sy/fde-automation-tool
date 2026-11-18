@@ -114,6 +114,8 @@ fde-automation-tool/
   worker 已复制到 `public/pdf.worker.min.mjs`。
   *练：把你数据科学的"解析/抽取"能力用进来。*
   > 测试：`npm run make-test-pdf` 生成 `public/sample-waybill.pdf`，到 /upload 上传它应抽出 6 个字段。
+  > **批量评测**：`npm run make-waybills` 生成 8 张不同版式的运单（标签变体 / 中文日期 / 千分位金额 / 带分隔符电话 / 地址跨行 / 多单号多金额干扰 / 英文单据），
+  > 再跑 `npm run eval-extract` 逐字段比对标准答案。当前 **48/48 全通过**（重构前为 37/48）。
   > TODO（进阶）：接大模型兜底，处理扫描件/图片型 PDF。
 
 - [x] **Step 6 · 美化与组件化（Tailwind / shadcn）** ✅ 已完成
