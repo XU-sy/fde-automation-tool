@@ -150,9 +150,10 @@ fde-automation-tool/
   把 GitHub 仓库导入 Vercel，配 `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` 两个环境变量，Deploy。
   *练：Vercel 托管。域名走 Cloudflare（DNS + 免费 SSL + 加速 + WAF）。*
 
-- [ ] **Step 12 · 收尾与复盘**
-  写一份"这个 MVP 为某行业省了多少人力"的简短 case，存进你公司的案例库（呼应 SEO/GEO 获客）。
+- [x] **Step 12 · 收尾与复盘** ✅ 底稿已完成
+  案例底稿见 `docs/case-study.md`：痛点 → 方案取舍 → 技术链路 → 三个真实难点 → 效率测算模型 → 复用改动面 → SEO/GEO 建议。
   *练：把交付变成可复制、可获客的资产。*
+  > 待补：`N`（日单量）、`T_manual`（人工单票耗时）需现场实测后填入，文中已标【待确认】，勿凭印象填写。
 
 ---
 
