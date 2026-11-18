@@ -33,7 +33,18 @@ export async function fillWebSystem(fields: Fields): Promise<void> {
   }
 
   // await = "等这个结果回来再继续"。chromium.launch 启动一个无界面浏览器。
-  const browser: Browser = await chromium.launch({ headless: true });
+  //
+  // 关于"用哪个浏览器"（这里有个容易误解的点）：
+  //   - 不写 channel      → 用 Playwright 自带的 Chromium（在 ms-playwright 缓存里，版本锁死）
+  //   - channel: "chrome" → 用你电脑上装的正版 Chrome
+  //   - channel: "msedge" → 用系统自带的 Edge
+  // 默认走自带 Chromium，是为了"可复现"：今天跑和半年后跑行为一致，且服务器/CI 上没装浏览器也能跑。
+  // 现场需要切浏览器时，改 .env.local 里的 BROWSER_CHANNEL 即可，不用改代码。
+  const channel = process.env.BROWSER_CHANNEL || undefined; // 空字符串也归为"不指定"
+  const browser: Browser = await chromium.launch({
+    headless: true,
+    channel: channel as any, // "chrome" | "msedge" | undefined
+  });
   const page: Page = await browser.newPage();
 
   // 打开目标网页，等到网络空闲再往下走。
