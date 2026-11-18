@@ -148,9 +148,11 @@ fde-automation-tool/
   `/api/automate` 加环境自检，检测到 `VERCEL` 就返回字段交接指引；上传页新增"下载 payload.json"；`run.ts` 支持 `npm run automate -- payload.json`。
   *练：运行时能力探测、部署环境差异处理。*
 
-- [ ] **Step 11b · 在 Vercel 真正点一次部署**
-  把 GitHub 仓库导入 Vercel，配 `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` 两个环境变量，Deploy。
-  *练：Vercel 托管。域名走 Cloudflare（DNS + 免费 SSL + 加速 + WAF）。*
+- [x] **Step 11b · 在 Vercel 真正点一次部署** ✅ 已上线（2026-11-18）
+  线上地址：<https://fde-automation-tool.vercel.app>（Production，状态 Ready）
+  仓库已导入 Vercel，环境变量只配了两条：`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`。
+  注意：`SUPABASE_SERVICE_ROLE_KEY`、`TARGET_SYSTEM_URL`、`CLOUDFLARE_API_TOKEN` **均未配置**，云端用不到且属高危凭据。
+  *练：Vercel 托管。域名走 Cloudflare（DNS + 免费 SSL + 加速 + WAF）——域名绑定仍未做。*
 
 - [x] **Step 12 · 收尾与复盘** ✅ 底稿已完成
   案例底稿见 `docs/case-study.md`：痛点 → 方案取舍 → 技术链路 → 三个真实难点 → 效率测算模型 → 复用改动面 → SEO/GEO 建议。
@@ -162,6 +164,18 @@ fde-automation-tool/
 ## 七、合规提醒（重要）
 
 CDP 自动化**只用于你有权限的系统或公开数据**。爬竞品机密、绕登录、刷量均属违规，政企客户场景尤其要避。本项目 FIELD_SELECTORS 留空即为安全默认。
+
+### 数据安全（RLS）—— 上线后必须处理
+
+线上地址已公开，而 `NEXT_PUBLIC_SUPABASE_ANON_KEY` 会随网页发给每个访客（F12 可见）。因此数据库的权限策略**不能依赖密钥保密**，只能依赖 RLS。
+
+| 阶段 | 策略 | 状态 |
+|---|---|---|
+| 开发期 | `allow all (dev only)`：任何人可读、写、改、**删** | ⚠️ 上线后必须替换 |
+| 阶段一 | 只放行 select / insert / update，**不建 delete 策略**（默认拒绝） | 见 `supabase/rls-hardening.sql`，待在控制台执行 |
+| 阶段二 | 接入登录后按 `auth.uid()` 做行级隔离 | 未做（需同批上线登录功能，否则页面空白） |
+
+> 阶段一的效果：功能完全不变，但陌生人无法清空你的表。它挡不住"篡改"——那只能靠阶段二的账号体系。
 
 ---
 
