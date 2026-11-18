@@ -159,6 +159,11 @@ fde-automation-tool/
   *练：把交付变成可复制、可获客的资产。*
   > 待补：`N`（日单量）、`T_manual`（人工单票耗时）需现场实测后填入，文中已标【待确认】，勿凭印象填写。
 
+- [x] **Step 13 · 录入可靠性（幂等 + 失败重试）** ✅ 已完成（2026-11-18）
+  同一运单号只录一次（本地台账 `automation/ledger.json`），批量失败项写入 `automation/failures.json` 且可单独重试。
+  详见第十节。
+  *练：把"能跑"变成"敢让它跑"——这一层才是客户真正的准入条件。*
+
 ---
 
 ## 七、合规提醒（重要）
@@ -237,5 +242,55 @@ npm run automate -- payload.json
 
 ### 安全提醒
 
-`supabase/schema.sql` 里目前是 `allow all (dev only)` 策略，**任何拿到线上链接的人都能读写 `documents` 表**。
-做作品集演示可接受，但对外公开前应改为基于 `auth.uid()` 的细粒度策略。
+原 `supabase/schema.sql` 的 `allow all (dev only)` 已在 2026-11-18 替换为 `supabase/rls-hardening.sql` 的三条策略（select / insert / update，**不建 delete**），陌生访客无法清空 `documents` 表。
+
+仍待收紧的部分：当前没有登录体系，任何拿到链接的人**仍可写入与修改**记录。发给真实客户前需接入 Supabase Auth 并按 `auth.uid()` 做行级隔离（阶段二，SQL 已注释保留在 `rls-hardening.sql` 底部）。
+
+---
+
+## 十、录入可靠性（防重复 / 失败重试）
+
+这一节解决的不是"能不能跑"，而是"客户敢不敢让它跑"。
+
+### 为什么幂等是准入门槛
+
+物流/订单系统里**同一张运单被录两遍是事故**——会直接产生重复订单、重复对账、重复发货。客户能容忍"偶尔要人工补录"，但绝不容忍"同一单进了两次系统"。
+
+因此每次录入前，先按 `tracking_no` 查本地台账，已成功录入过的直接跳过。
+
+### 台账设计（为什么用本地文件）
+
+| 取舍 | 原因 |
+|---|---|
+| 存本地 `automation/ledger.json` | 客户内网常常连不上公网数据库；本地留痕不依赖网络，也天然是一份审计流水 |
+| 只认 `status = "entered"` | 失败记录不算"已录"，重试不会被自己挡住 |
+| 台账损坏时备份重建 | 一个损坏的 JSON 不该让整条录入链瘫痪 |
+| 台账不进 Git | 内含客户真实运单号，属敏感数据 |
+
+### 命令一览
+
+```bash
+npm run automate                              # 单条（内置示例字段）
+npm run automate -- payload.json              # 单条（云端导出的真实字段）
+npm run automate -- batch.json                # 批量（文件内容为字段对象数组）
+npm run automate -- batch.json --force        # 强制重录，忽略台账（仅测试/客户要求补录）
+npm run automate -- --retry-failed            # 只重试上次失败的条目
+```
+
+### 批量文件格式
+
+单条对象、对象数组、`{ "items": [...] }` 三种都接受：
+
+```json
+[
+  { "tracking_no": "SF001", "receiver": "张三", "amount": "128.50" },
+  { "tracking_no": "SF002", "receiver": "李四", "amount": "99.00" }
+]
+```
+
+跑完会打印汇总（成功 / 跳过 / 失败），失败条目写入 `automation/failures.json`，并返回**非零退出码**（可接 CI 或批处理脚本判断成败）。
+
+### 与"一键录入"按钮的关系
+
+`/api/automate` 也走同一套幂等逻辑（`enterOnce`），因此用户连点两次按钮、或网络重试，都不会让同一单进系统两遍——第二次会返回 `skipped: true`。
+

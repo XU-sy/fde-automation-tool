@@ -56,10 +56,26 @@ export async function POST(req: NextRequest) {
 
   // ③ 有能力才真正动浏览器
   try {
-    // 动态 import：只有真的要开浏览器时才加载 fill-web / playwright，
+    // 动态 import：只有真的要开浏览器时才加载 enter-once / fill-web / playwright，
     // 避免构建阶段就把浏览器相关代码拉进产物。
-    const { fillWebSystem } = await import("@/automation/fill-web");
-    await fillWebSystem(fields as any);
+    //
+    // 为什么调 enter-once 而不是直接调 fillWebSystem：
+    //   它会在开浏览器之前先查台账，同一运单号已录过就跳过——
+    //   防止用户连点两次按钮、或网络重试导致同一单进系统两遍。
+    const { enterOnce } = await import("@/automation/enter-once");
+    const outcome = await enterOnce(fields as any, { source: "api/automate" });
+
+    if (outcome.status === "skipped") {
+      return NextResponse.json({
+        ok: true,
+        skipped: true,
+        message: `运单 ${outcome.tracking_no} 已于 ${outcome.enteredAt} 录入过，本次跳过（防重复录入）`,
+      });
+    }
+
+    if (outcome.status === "failed") {
+      return NextResponse.json({ ok: false, error: outcome.error }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true, message: "已触发网页系统自动录入" });
   } catch (e: any) {

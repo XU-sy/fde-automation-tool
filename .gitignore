@@ -29,5 +29,10 @@ npm-debug.log*
 # playwright 截图存证（运行产物，非源码）
 automation/last-run.png
 
+# 录入台账与失败清单（含客户真实运单号，绝不入库）
+automation/ledger.json
+automation/ledger.json.broken-*
+automation/failures.json
+
 # typescript 增量缓存
 *.tsbuildinfo
